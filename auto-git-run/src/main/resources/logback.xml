@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <property name="log_home" value="log/"/>
+
+    <!-- 控制台 -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%highlight(%d{yyyy-MM-dd HH:mm}) %boldYellow([%thread]) %-5level %boldCyan([%logger{50}[%L]]) %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 日志文件 -->
+    <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--当前日志输出文件位置，目录不存在时会自动创建-->
+        <file>${log_home}/info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--每天滚动，满足条件时滚动生成的文件名格式-->
+            <fileNamePattern>${log_home}/info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!--该日志的最大数量, 4个月-->
+            <MaxHistory>120</MaxHistory>
+        </rollingPolicy>
+        <!--日志输出格式，编码以及信息格式-->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm} [%thread] %-5level %logger{50}[%L] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 日志输出级别 -->
+    <root level="info">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file_info"/>
+    </root>
+</configuration>

@@ -1,0 +1,17 @@
+# git项目
+pro:
+  - proPath: F:/test-jgit
+    proName: 测试jgit
+    proFile:
+      - README.md
+      - src/
+#  - proPath: F:/mind
+#    proName: 思维导图
+#  - proPath: F:/note-spring2
+#    proName: 笔记项目
+#  - proPath: F:/InterviewNote
+#    proName: 学习笔记
+# 默认用户密码
+global-config:
+  username: 1340215221
+  password: rh67505509aru
