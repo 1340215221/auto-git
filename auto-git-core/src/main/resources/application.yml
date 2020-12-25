@@ -5,6 +5,11 @@ pro:
     proFile:
       - README.md
       - src/
+  - proPath: F:/mind
+    proName: 思维导图
+    proFile:
+      - README.md
+      - 2020/
 #  - proPath: F:/mind
 #    proName: 思维导图
 #  - proPath: F:/note-spring2

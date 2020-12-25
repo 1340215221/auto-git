@@ -6,9 +6,11 @@ import com.rh.git.config.GlobalConfig
 import com.rh.git.model.GitProInfo
 import groovy.swing.SwingBuilder
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
+import javax.annotation.Resource
 import javax.swing.JFrame
 import javax.swing.JLabel
 import java.awt.BorderLayout
@@ -19,16 +21,24 @@ import java.awt.GridLayout
 class MainBuilder {
 
     @Autowired
-    private ApplicationContext app;
+    private ApplicationContext app
     @Autowired
     private GlobalConfig globalConfig
-    @Autowired
+    @Resource(name = "GitProList")
     private GitProList gitProList
     @Autowired
     private GitAction gitAction
     public static final SwingBuilder swingBuilder = new SwingBuilder()
     /**
-     * 失败状态颜色
+     * 操作中
+     */
+    public static Color operationColor = Color.gray
+    /**
+     * 成功颜色
+     */
+    public static Color okColor = Color.green
+    /**
+     * 失败颜色
      */
     public static Color failColor = Color.red
 
@@ -80,23 +90,36 @@ class MainBuilder {
                                     ) {
                                         swingBuilder.button(text: '提交',
                                                 mouseClicked: {
-                                                    try {
-                                                        gitAction.commit(bean)
-                                                    } catch (Exception e) {
-                                                        swingBuilder."git-pro-status${bean.getProPath()}".background = failColor
-                                                        swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>失败<br>${e.getMessage()}</body></html>"
-                                                        throw e
+                                                    swingBuilder.doOutside {
+                                                        try {
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = operationColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交中...</body></html>"
+                                                            gitAction.commit(bean)
+                                                            gitAction.update(bean)
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = okColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交成功</body></html>"
+                                                        } catch (Exception e) {
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = failColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交失败<br>${e.getMessage()}</body></html>"
+                                                            throw e
+                                                        }
                                                     }
                                                 }
                                         )
                                         swingBuilder.button(text: '更新',
                                                 mouseClicked: {
-                                                    try {
-                                                        gitAction.update(bean)
-                                                    } catch (Exception e) {
-                                                        swingBuilder."git-pro-status${bean.getProPath()}".background = failColor
-                                                        swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>失败<br>${e.getMessage()}</body></html>"
-                                                        throw e
+                                                    swingBuilder.doOutside {
+                                                        try {
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = operationColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>更新中...</body></html>"
+                                                            gitAction.update(bean)
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = okColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>更新成功</body></html>"
+                                                        } catch (Exception e) {
+                                                            swingBuilder."git-pro-status${bean.getProPath()}".background = failColor
+                                                            swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>失败<br>${e.getMessage()}</body></html>"
+                                                            throw e
+                                                        }
                                                     }
                                                 }
                                         )

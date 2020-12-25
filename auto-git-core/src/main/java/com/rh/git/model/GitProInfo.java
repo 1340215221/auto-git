@@ -5,6 +5,7 @@ import com.rh.git.config.GitProList;
 import com.rh.git.config.GlobalConfig;
 import com.rh.git.util.UpdateGitStatusUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -17,7 +18,8 @@ import java.util.List;
  * git项目信息
  */
 @Data
-@Component
+@Slf4j
+@Component("GitProInfo")
 @Scope("prototype")
 public class GitProInfo implements GitParam {
     private String username;
@@ -56,10 +58,11 @@ public class GitProInfo implements GitParam {
      */
     public void updatePro() {
         try {
-            gitAction.update(this);
+            util.update(proPath, () -> {
+                gitAction.update(this);
+            });
         } catch (Exception e) {
-            util.updateToFail(proPath, e);
-            throw e;
+            log.error("[updatePro], e");
         }
     }
 }

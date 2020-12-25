@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.EmptyCommitException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -34,9 +35,34 @@ public class GitAction {
             throw new RuntimeException();
         }
 
+        Git git = null;
         try {
-            Git git = Git.open(file);
-            git.pull().setStrategy(MergeStrategy.SIMPLE_TWO_WAY_IN_CORE).call();
+            git = Git.open(file);
+
+            if (CollectionUtils.isNotEmpty(param.getCommitFileProPath())) {
+                // add
+                try {
+                    AddCommand add = git.add();
+                    param.getCommitFileProPath().forEach(add::addFilepattern);
+                    add.call();
+                } catch (Exception e) {
+                    throw new RuntimeException("优先保存本地修改失败", e);
+                }
+                // commit
+                try {
+                    git.commit().setMessage("update").setAllowEmpty(false).call();
+                } catch (EmptyCommitException e) {
+                } catch (Exception e) {
+                    throw new RuntimeException("优先保存本地修改失败", e);
+                }
+            }
+
+            try {
+                // pull
+                git.pull().setStrategy(MergeStrategy.SIMPLE_TWO_WAY_IN_CORE).call();
+            } catch (TransportException e) {
+                git.pull().setCredentialsProvider(new UsernamePasswordCredentialsProvider(param.getUsername(), param.getPassword())).setStrategy(MergeStrategy.SIMPLE_TWO_WAY_IN_CORE).call();
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +109,16 @@ public class GitAction {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        // todo 冲突时, 不会推送, 也不会有异常提示
+        try {
+            try {
+                // pull
+                git.pull().setStrategy(MergeStrategy.SIMPLE_TWO_WAY_IN_CORE).call();
+            } catch (TransportException e) {
+                git.pull().setCredentialsProvider(new UsernamePasswordCredentialsProvider(param.getUsername(), param.getPassword())).setStrategy(MergeStrategy.SIMPLE_TWO_WAY_IN_CORE).call();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("可能为冲突错误", e);
+        }
         System.out.println("commit ok");
     }
 

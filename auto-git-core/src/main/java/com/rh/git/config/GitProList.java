@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * git项目配置
  */
-@Component
+@Component("GitProList")
 @ConfigurationProperties(prefix = "pro")
 public class GitProList implements List<GitProList.GitProItem> {
     @Delegate
@@ -39,7 +40,7 @@ public class GitProList implements List<GitProList.GitProItem> {
             if (StringUtils.isBlank(item.getProPath())) {
                 return;
             }
-            GitProInfo info = app.getBean(GitProInfo.class, item, globalConfig);
+            GitProInfo info = (GitProInfo) app.getBean("GitProInfo", item, globalConfig);
             app.getBeanFactory().registerSingleton("GitProInfo_" + item.getProPath(), info);
         });
     }
