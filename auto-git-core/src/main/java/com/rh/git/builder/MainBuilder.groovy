@@ -46,6 +46,25 @@ class MainBuilder {
         swingBuilder.frame(id: 'frame',
                 pack: true,
                 defaultCloseOperation: JFrame.DO_NOTHING_ON_CLOSE,
+                windowClosing: {
+                    swingBuilder.doOutside {
+                        def map = app.getBeansOfType(GitProInfo, false, true)
+                        map.each {key, bean ->
+                            try {
+                                swingBuilder."git-pro-status${bean.getProPath()}".background = operationColor
+                                swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交中...</body></html>"
+                                gitAction.commit(bean)
+                                swingBuilder."git-pro-status${bean.getProPath()}".background = okColor
+                                swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交成功</body></html>"
+                            } catch (Exception e) {
+                                swingBuilder."git-pro-status${bean.getProPath()}".background = failColor
+                                swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交失败<br>${e.getMessage()}</body></html>"
+                                throw e
+                            }
+                        }
+                        System.exit(0)
+                    }
+                },
         ) {
             swingBuilder.panel(id: 'root',
                     layout: new BorderLayout(),
@@ -74,11 +93,11 @@ class MainBuilder {
                                     // git项目状态
                                     swingBuilder.panel(id: "git-pro-status${bean.getProPath()}",
                                             layout: new BorderLayout(),
-                                            background: bean.getStatusColor(),
+                                            background: operationColor,
                                     ) {
                                         try {
                                             swingBuilder.label(id: "git-pro-status-text${bean.getProPath()}",
-                                                    text: bean.getStatus(),
+                                                    text: "待更新",
                                                     horizontalAlignment: JLabel.CENTER,
                                             )
                                         } catch (Exception e) {
@@ -95,7 +114,6 @@ class MainBuilder {
                                                             swingBuilder."git-pro-status${bean.getProPath()}".background = operationColor
                                                             swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交中...</body></html>"
                                                             gitAction.commit(bean)
-                                                            gitAction.update(bean)
                                                             swingBuilder."git-pro-status${bean.getProPath()}".background = okColor
                                                             swingBuilder."git-pro-status-text${bean.getProPath()}".text = "<html><body>提交成功</body></html>"
                                                         } catch (Exception e) {
